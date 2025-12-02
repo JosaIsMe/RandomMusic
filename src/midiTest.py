@@ -557,6 +557,19 @@ def shift_up_or_down_prob_0_01(segment):
             if msg.type == 'note_off' and msg.velocity > 0 and msg.note == curnote and modified:
                 modified = 0
                 msg.note += shift
+def shift_up_or_down_prob_0_001(segment):
+    shift = random.randint(-1,2)
+    curnote = segment.tracks[0].note
+    modified = 0
+    for track in segment.tracks:
+        for msg in track:
+            if msg.type == 'note_on' and msg.velocity > 0 and random.randint(0,1000) <= 1:
+                curnote = msg.note
+                modified = 1
+                msg.note += shift
+            if msg.type == 'note_off' and msg.velocity > 0 and msg.note == curnote and modified:
+                modified = 0
+                msg.note += shift
 
 
 def note_number_to_name(note_number):
@@ -623,7 +636,7 @@ class Iterator:
         self.segmentPool = self.rmg.generateSegments(self.segmentPoolSize, self.segmentLength)
         self.keepFunction = firstHalf
         self.adaptationFunction = pitch_variance_adaptation  # 使用音高方差作为适应度
-        self.mutationPool = [shift_up_or_down_prob_0_01]
+        self.mutationPool = [shift_up_or_down_prob_0_01, shift_up_or_down_prob_0_001]
         self.mutationIntensity = self.segmentPoolSize // 8
         self.crossIntensity = self.segmentPoolSize // 4
 
