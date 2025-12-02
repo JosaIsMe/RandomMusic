@@ -627,6 +627,13 @@ def rhythmic_complexity_adaptation(segment, time_resolution=16):
     max_entropy = np.log2(5)
     return entropy / max_entropy
 
+def final_adaptation(segment, **kwargs):
+    functions = {rhythmic_complexity_adaptation:1.0,pitch_variance_adaptation:2.0}
+    total_weight = sum(functions.values())
+    result = 0.0
+    for function,weight in functions:
+        result += weight * function(segment)
+    return result / total_weight
 
 class Iterator:
     def __init__(self):
@@ -635,7 +642,7 @@ class Iterator:
         self.segmentLength = 64
         self.segmentPool = self.rmg.generateSegments(self.segmentPoolSize, self.segmentLength)
         self.keepFunction = firstHalf
-        self.adaptationFunction = pitch_variance_adaptation  # 使用音高方差作为适应度
+        self.adaptationFunction = final_adaptation  # 使用函数加权平均作为适应度
         self.mutationPool = [shift_up_or_down_prob_0_01, shift_up_or_down_prob_0_001]
         self.mutationIntensity = self.segmentPoolSize // 8
         self.crossIntensity = self.segmentPoolSize // 4
